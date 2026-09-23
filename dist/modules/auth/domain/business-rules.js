@@ -6,18 +6,11 @@ const time_util_js_1 = require("../../../core/utils/time.util.js");
 class AuthBusinessRules {
     /**
      * REGLA 1: Fortaleza de Contraseña
-     * Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un dígito y un carácter especial.
+     * Mínimo 6 caracteres para facilidad de uso en dispositivos móviles y entornos de prácticas.
      */
     static validatePassword(password) {
-        if (!password || password.length < 8) {
-            throw new app_error_js_1.BusinessRuleViolationError('La contraseña debe tener al menos 8 caracteres.', 'PASSWORD_TOO_SHORT');
-        }
-        const hasUpperCase = /[A-Z]/.test(password);
-        const hasLowerCase = /[a-z]/.test(password);
-        const hasNumber = /[0-9]/.test(password);
-        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-        if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecial) {
-            throw new app_error_js_1.BusinessRuleViolationError('La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un símbolo especial (@$!%*?&).', 'PASSWORD_TOO_WEAK');
+        if (!password || password.length < 6) {
+            throw new app_error_js_1.BusinessRuleViolationError('La contraseña debe tener al menos 6 caracteres.', 'PASSWORD_TOO_SHORT');
         }
     }
     /**
@@ -48,8 +41,8 @@ class AuthBusinessRules {
      * Límite razonable entre 100 y 1200 horas totales (estándar 360 - 480 horas).
      */
     static validateMetaHoras(metaHoras) {
-        if (!Number.isInteger(metaHoras) || metaHoras < 100 || metaHoras > 1200) {
-            throw new app_error_js_1.BusinessRuleViolationError('La meta de horas debe ser un número entero entre 100 y 1200 horas.', 'INVALID_META_HORAS');
+        if (metaHoras < 100 || metaHoras > 1200) {
+            throw new app_error_js_1.BusinessRuleViolationError('La meta de horas debe ser un valor entre 100 y 1200 horas.', 'INVALID_META_HORAS');
         }
     }
     /**

@@ -8,16 +8,19 @@ class RegisterUseCase {
         this.authRepository = authRepository;
     }
     async execute(dto) {
-        // 1. Aplicar reglas de negocio obligatorias
+        // 1. Aplicar reglas de negocio
         business_rules_js_1.AuthBusinessRules.validatePassword(dto.password);
-        business_rules_js_1.AuthBusinessRules.validateConvenioDates(dto.fechaInicio, dto.fechaFin);
-        business_rules_js_1.AuthBusinessRules.validateMetaHoras(dto.metaHoras);
-        const horaInicio = dto.horaInicioHabitual || '08:00';
-        const horaFin = dto.horaFinHabitual || '17:00';
-        const descuento = dto.descuentoAlmuerzoHabitual ?? 60;
-        business_rules_js_1.AuthBusinessRules.validateHabitualSchedule(horaInicio, horaFin, descuento);
+        if (dto.fechaInicio && dto.fechaFin) {
+            business_rules_js_1.AuthBusinessRules.validateConvenioDates(dto.fechaInicio, dto.fechaFin);
+        }
+        const meta = dto.metaHorasTotal ?? dto.metaHoras ?? 360;
+        business_rules_js_1.AuthBusinessRules.validateMetaHoras(meta);
         // 2. Persistir en el repositorio
-        return await this.authRepository.register(dto);
+        return await this.authRepository.register({
+            ...dto,
+            metaHorasTotal: meta,
+            metaHoras: meta,
+        });
     }
 }
 exports.RegisterUseCase = RegisterUseCase;

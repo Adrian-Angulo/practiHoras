@@ -1,7 +1,7 @@
 export declare class AuthBusinessRules {
     /**
      * REGLA 1: Fortaleza de Contraseña
-     * Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un dígito y un carácter especial.
+     * Mínimo 6 caracteres para facilidad de uso en dispositivos móviles y entornos de prácticas.
      */
     static validatePassword(password: string): void;
     /**

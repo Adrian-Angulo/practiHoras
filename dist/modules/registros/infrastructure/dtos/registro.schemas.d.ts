@@ -1,43 +1,63 @@
 import { z } from 'zod';
 export declare const CrearRegistroSchema: z.ZodEffects<z.ZodObject<{
+    id: z.ZodOptional<z.ZodString>;
     fecha: z.ZodString;
     horaInicio: z.ZodString;
     horaFin: z.ZodString;
-    descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-    modalidad: z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>;
+    descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
+    refrigerioMinutos: z.ZodOptional<z.ZodNumber>;
+    horasComputables: z.ZodOptional<z.ZodNumber>;
+    modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
     actividades: z.ZodString;
     supervisorNombre: z.ZodUnion<[z.ZodNullable<z.ZodOptional<z.ZodString>>, z.ZodLiteral<"">]>;
+    estado: z.ZodOptional<z.ZodEnum<["Borrador", "Pendiente", "Aprobado", "Observado"]>>;
 }, "strip", z.ZodTypeAny, {
     horaInicio: string;
     horaFin: string;
-    descuentoAlmuerzoMinutos: number;
     modalidad: "Presencial" | "Remoto" | "Híbrido";
     fecha: string;
     actividades: string;
+    id?: string | undefined;
+    refrigerioMinutos?: number | undefined;
+    descuentoAlmuerzoMinutos?: number | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
     supervisorNombre?: string | null | undefined;
 }, {
     horaInicio: string;
     horaFin: string;
-    modalidad: "Presencial" | "Remoto" | "Híbrido";
     fecha: string;
     actividades: string;
+    id?: string | undefined;
+    refrigerioMinutos?: number | undefined;
     descuentoAlmuerzoMinutos?: number | undefined;
+    modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
     supervisorNombre?: string | null | undefined;
 }>, {
     horaInicio: string;
     horaFin: string;
-    descuentoAlmuerzoMinutos: number;
     modalidad: "Presencial" | "Remoto" | "Híbrido";
     fecha: string;
     actividades: string;
+    id?: string | undefined;
+    refrigerioMinutos?: number | undefined;
+    descuentoAlmuerzoMinutos?: number | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
     supervisorNombre?: string | null | undefined;
 }, {
     horaInicio: string;
     horaFin: string;
-    modalidad: "Presencial" | "Remoto" | "Híbrido";
     fecha: string;
     actividades: string;
+    id?: string | undefined;
+    refrigerioMinutos?: number | undefined;
     descuentoAlmuerzoMinutos?: number | undefined;
+    modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
     supervisorNombre?: string | null | undefined;
 }>;
 export declare const ActualizarRegistroSchema: z.ZodObject<{
@@ -45,25 +65,57 @@ export declare const ActualizarRegistroSchema: z.ZodObject<{
     horaInicio: z.ZodOptional<z.ZodString>;
     horaFin: z.ZodOptional<z.ZodString>;
     descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
+    refrigerioMinutos: z.ZodOptional<z.ZodNumber>;
+    horasComputables: z.ZodOptional<z.ZodNumber>;
     modalidad: z.ZodOptional<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
     actividades: z.ZodOptional<z.ZodString>;
-    supervisorNombre: z.ZodOptional<z.ZodString>;
+    supervisorNombre: z.ZodUnion<[z.ZodNullable<z.ZodOptional<z.ZodString>>, z.ZodLiteral<"">]>;
+    estado: z.ZodOptional<z.ZodEnum<["Borrador", "Pendiente", "Aprobado", "Observado"]>>;
 }, "strip", z.ZodTypeAny, {
     horaInicio?: string | undefined;
     horaFin?: string | undefined;
+    refrigerioMinutos?: number | undefined;
     descuentoAlmuerzoMinutos?: number | undefined;
     modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
     fecha?: string | undefined;
     actividades?: string | undefined;
-    supervisorNombre?: string | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
+    supervisorNombre?: string | null | undefined;
 }, {
     horaInicio?: string | undefined;
     horaFin?: string | undefined;
+    refrigerioMinutos?: number | undefined;
     descuentoAlmuerzoMinutos?: number | undefined;
     modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
     fecha?: string | undefined;
     actividades?: string | undefined;
-    supervisorNombre?: string | undefined;
+    estado?: "Borrador" | "Pendiente" | "Aprobado" | "Observado" | undefined;
+    horasComputables?: number | undefined;
+    supervisorNombre?: string | null | undefined;
+}>;
+export declare const FiltrosRegistrosSchema: z.ZodObject<{
+    mes: z.ZodOptional<z.ZodNumber>;
+    anio: z.ZodOptional<z.ZodNumber>;
+    modalidad: z.ZodOptional<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
+    desde: z.ZodOptional<z.ZodString>;
+    hasta: z.ZodOptional<z.ZodString>;
+    limite: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    hasta?: string | undefined;
+    modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    desde?: string | undefined;
+    mes?: number | undefined;
+    anio?: number | undefined;
+    limite?: number | undefined;
+}, {
+    hasta?: string | undefined;
+    modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    desde?: string | undefined;
+    mes?: number | undefined;
+    anio?: number | undefined;
+    limite?: number | undefined;
 }>;
 export type CrearRegistroInput = z.infer<typeof CrearRegistroSchema>;
 export type ActualizarRegistroInput = z.infer<typeof ActualizarRegistroSchema>;
+export type FiltrosRegistrosInput = z.infer<typeof FiltrosRegistrosSchema>;

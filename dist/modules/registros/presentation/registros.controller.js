@@ -2,10 +2,30 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegistrosController = void 0;
 const app_error_js_1 = require("../../../core/errors/app-error.js");
+const create_registro_use_case_js_1 = require("../application/create-registro.use-case.js");
+const list_registros_use_case_js_1 = require("../application/list-registros.use-case.js");
+const get_registro_by_id_use_case_js_1 = require("../application/get-registro-by-id.use-case.js");
+const update_registro_use_case_js_1 = require("../application/update-registro.use-case.js");
+const delete_registro_use_case_js_1 = require("../application/delete-registro.use-case.js");
+const export_csv_use_case_js_1 = require("../application/export-csv.use-case.js");
 class RegistrosController {
     registrosRepo;
-    constructor(registrosRepo) {
+    profileRepo;
+    createUseCase;
+    listUseCase;
+    getByIdUseCase;
+    updateUseCase;
+    deleteUseCase;
+    exportCsvUseCase;
+    constructor(registrosRepo, profileRepo) {
         this.registrosRepo = registrosRepo;
+        this.profileRepo = profileRepo;
+        this.createUseCase = new create_registro_use_case_js_1.CreateRegistroUseCase(registrosRepo);
+        this.listUseCase = new list_registros_use_case_js_1.ListRegistrosUseCase(registrosRepo);
+        this.getByIdUseCase = new get_registro_by_id_use_case_js_1.GetRegistroByIdUseCase(registrosRepo);
+        this.updateUseCase = new update_registro_use_case_js_1.UpdateRegistroUseCase(registrosRepo);
+        this.deleteUseCase = new delete_registro_use_case_js_1.DeleteRegistroUseCase(registrosRepo);
+        this.exportCsvUseCase = new export_csv_use_case_js_1.ExportCsvUseCase(registrosRepo, profileRepo);
     }
     getUserId(req) {
         if (!req.user?.id) {
@@ -17,12 +37,8 @@ class RegistrosController {
         try {
             const userId = this.getUserId(req);
             const input = req.body;
-            const registro = await this.registrosRepo.crear(userId, input);
-            res.status(201).json({
-                success: true,
-                message: 'Jornada registrada exitosamente en Supabase',
-                data: registro,
-            });
+            const registro = await this.createUseCase.execute(userId, input);
+            res.status(201).json(registro);
         }
         catch (err) {
             next(err);
@@ -31,12 +47,9 @@ class RegistrosController {
     listar = async (req, res, next) => {
         try {
             const userId = this.getUserId(req);
-            const limite = req.query.limite ? parseInt(req.query.limite, 10) : undefined;
-            const registros = await this.registrosRepo.listar(userId, limite);
-            res.status(200).json({
-                success: true,
-                data: registros,
-            });
+            const query = req.query;
+            const registros = await this.listUseCase.execute(userId, query);
+            res.status(200).json(registros);
         }
         catch (err) {
             next(err);
@@ -46,18 +59,8 @@ class RegistrosController {
         try {
             const userId = this.getUserId(req);
             const { id } = req.params;
-            const registro = await this.registrosRepo.obtenerPorId(userId, id);
-            if (!registro) {
-                res.status(404).json({
-                    success: false,
-                    error: { code: 'NOT_FOUND', message: 'Registro no encontrado' },
-                });
-                return;
-            }
-            res.status(200).json({
-                success: true,
-                data: registro,
-            });
+            const registro = await this.getByIdUseCase.execute(userId, id);
+            res.status(200).json(registro);
         }
         catch (err) {
             next(err);
@@ -68,12 +71,8 @@ class RegistrosController {
             const userId = this.getUserId(req);
             const { id } = req.params;
             const input = req.body;
-            const actualizado = await this.registrosRepo.actualizar(userId, id, input);
-            res.status(200).json({
-                success: true,
-                message: 'Jornada actualizada exitosamente',
-                data: actualizado,
-            });
+            const actualizado = await this.updateUseCase.execute(userId, id, input);
+            res.status(200).json(actualizado);
         }
         catch (err) {
             next(err);
@@ -83,37 +82,23 @@ class RegistrosController {
         try {
             const userId = this.getUserId(req);
             const { id } = req.params;
-            await this.registrosRepo.eliminar(userId, id);
+            await this.deleteUseCase.execute(userId, id);
             res.status(200).json({
-                success: true,
-                message: 'Jornada eliminada exitosamente',
+                message: 'Registro eliminado con éxito',
             });
         }
         catch (err) {
             next(err);
         }
     };
-    obtenerKpis = async (req, res, next) => {
+    exportarCsv = async (req, res, next) => {
         try {
             const userId = this.getUserId(req);
-            const kpis = await this.registrosRepo.obtenerKpis(userId);
-            res.status(200).json({
-                success: true,
-                data: kpis,
-            });
-        }
-        catch (err) {
-            next(err);
-        }
-    };
-    obtenerRendimientoSemanal = async (req, res, next) => {
-        try {
-            const userId = this.getUserId(req);
-            const rendimiento = await this.registrosRepo.obtenerRendimientoSemanal(userId);
-            res.status(200).json({
-                success: true,
-                data: rendimiento,
-            });
+            const csvContent = await this.exportCsvUseCase.execute(userId);
+            const filename = `practihoras-reporte-${new Date().toISOString().split('T')[0]}.csv`;
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.status(200).send(csvContent);
         }
         catch (err) {
             next(err);

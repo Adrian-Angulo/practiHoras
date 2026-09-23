@@ -9,44 +9,48 @@ export const errorHandler: ErrorRequestHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  // Manejo de errores de validación de Zod
+  const timestamp = new Date().toISOString();
+
+  // 1. Errores de validación de Zod
   if (err instanceof ZodError) {
     const formattedErrors = err.errors.map((e) => ({
       campo: e.path.join('.'),
       mensaje: e.message,
     }));
 
+    const firstMsg = err.errors[0]?.message || 'Error de validación en los datos enviados';
+
     res.status(400).json({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: firstMsg,
       success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Los datos enviados no cumplen con el formato requerido.',
-        detalles: formattedErrors,
-      },
+      detalles: formattedErrors,
+      timestamp,
     });
     return;
   }
 
-  // Manejo de errores controlados de la aplicación (AppError)
+  // 2. Errores controlados de dominio / aplicación (AppError)
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
+      statusCode: err.statusCode,
+      error: err.code,
+      message: err.message,
       success: false,
-      error: {
-        code: err.code,
-        message: err.message,
-      },
+      timestamp,
     });
     return;
   }
 
-  // Error 500 no controlado
+  // 3. Error 500 no controlado
   console.error('🔥 [Unhandled Server Error]:', err);
   res.status(500).json({
+    statusCode: 500,
+    error: 'Internal Server Error',
+    message: 'Ocurrió un error inesperado en el servidor.',
     success: false,
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'Ocurrió un error inesperado en el servidor.',
-      ...(ENV.isDev ? { stack: err.stack } : {}),
-    },
+    timestamp,
+    ...(ENV.isDev ? { stack: err.stack } : {}),
   });
 };

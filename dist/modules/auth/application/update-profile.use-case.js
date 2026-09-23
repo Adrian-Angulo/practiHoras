@@ -11,13 +11,15 @@ class UpdateProfileUseCase {
         if (dto.fechaInicio && dto.fechaFin) {
             business_rules_js_1.AuthBusinessRules.validateConvenioDates(dto.fechaInicio, dto.fechaFin);
         }
-        if (dto.metaHoras !== undefined) {
-            business_rules_js_1.AuthBusinessRules.validateMetaHoras(dto.metaHoras);
+        const meta = dto.metaHorasTotal ?? dto.metaHoras;
+        if (meta !== undefined) {
+            business_rules_js_1.AuthBusinessRules.validateMetaHoras(meta);
         }
-        if (dto.horaInicioHabitual && dto.horaFinHabitual) {
-            business_rules_js_1.AuthBusinessRules.validateHabitualSchedule(dto.horaInicioHabitual, dto.horaFinHabitual, dto.descuentoAlmuerzoHabitual ?? 60);
-        }
-        return await this.authRepository.updateProfile(userId, dto);
+        return await this.authRepository.updateProfile(userId, {
+            ...dto,
+            metaHorasTotal: meta,
+            metaHoras: meta,
+        });
     }
 }
 exports.UpdateProfileUseCase = UpdateProfileUseCase;

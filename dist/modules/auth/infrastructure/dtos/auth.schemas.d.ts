@@ -1,502 +1,93 @@
 import { z } from 'zod';
 export declare const DiaHorarioSchema: z.ZodObject<{
+    diaSemana: z.ZodOptional<z.ZodString>;
     activo: z.ZodDefault<z.ZodBoolean>;
     horaInicio: z.ZodDefault<z.ZodString>;
     horaFin: z.ZodDefault<z.ZodString>;
-    descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
+    refrigerioMinutos: z.ZodDefault<z.ZodNumber>;
+    descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
     modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
 }, "strip", z.ZodTypeAny, {
     activo: boolean;
     horaInicio: string;
     horaFin: string;
-    descuentoAlmuerzoMinutos: number;
+    refrigerioMinutos: number;
     modalidad: "Presencial" | "Remoto" | "Híbrido";
+    diaSemana?: string | undefined;
+    descuentoAlmuerzoMinutos?: number | undefined;
 }, {
+    diaSemana?: string | undefined;
     activo?: boolean | undefined;
     horaInicio?: string | undefined;
     horaFin?: string | undefined;
+    refrigerioMinutos?: number | undefined;
     descuentoAlmuerzoMinutos?: number | undefined;
     modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
 }>;
-export declare const HorarioSemanalSchema: z.ZodObject<{
-    lunes: z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>;
-    martes: z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>;
-    miercoles: z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>;
-    jueves: z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>;
-    viernes: z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>;
-    sabado: z.ZodOptional<z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>>;
-    domingo: z.ZodOptional<z.ZodObject<{
-        activo: z.ZodDefault<z.ZodBoolean>;
-        horaInicio: z.ZodDefault<z.ZodString>;
-        horaFin: z.ZodDefault<z.ZodString>;
-        descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    }, "strip", z.ZodTypeAny, {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    }, {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    }>>;
+export declare const HorarioSemanalSchema: z.ZodRecord<z.ZodString, z.ZodObject<{
+    diaSemana: z.ZodOptional<z.ZodString>;
+    activo: z.ZodDefault<z.ZodBoolean>;
+    horaInicio: z.ZodDefault<z.ZodString>;
+    horaFin: z.ZodDefault<z.ZodString>;
+    refrigerioMinutos: z.ZodDefault<z.ZodNumber>;
+    descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
+    modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
 }, "strip", z.ZodTypeAny, {
-    lunes: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    };
-    martes: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    };
-    miercoles: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    };
-    jueves: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    };
-    viernes: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    };
-    sabado?: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    } | undefined;
-    domingo?: {
-        activo: boolean;
-        horaInicio: string;
-        horaFin: string;
-        descuentoAlmuerzoMinutos: number;
-        modalidad: "Presencial" | "Remoto" | "Híbrido";
-    } | undefined;
+    activo: boolean;
+    horaInicio: string;
+    horaFin: string;
+    refrigerioMinutos: number;
+    modalidad: "Presencial" | "Remoto" | "Híbrido";
+    diaSemana?: string | undefined;
+    descuentoAlmuerzoMinutos?: number | undefined;
 }, {
-    lunes: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    };
-    martes: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    };
-    miercoles: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    };
-    jueves: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    };
-    viernes: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    };
-    sabado?: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    } | undefined;
-    domingo?: {
-        activo?: boolean | undefined;
-        horaInicio?: string | undefined;
-        horaFin?: string | undefined;
-        descuentoAlmuerzoMinutos?: number | undefined;
-        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    } | undefined;
-}>;
-export declare const RegisterSchema: z.ZodObject<{
+    diaSemana?: string | undefined;
+    activo?: boolean | undefined;
+    horaInicio?: string | undefined;
+    horaFin?: string | undefined;
+    refrigerioMinutos?: number | undefined;
+    descuentoAlmuerzoMinutos?: number | undefined;
+    modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+}>>;
+export declare const RegisterSchema: z.ZodEffects<z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
-    nombreCompleto: z.ZodString;
+    nombre: z.ZodOptional<z.ZodString>;
+    nombreCompleto: z.ZodOptional<z.ZodString>;
     carrera: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     semestre: z.ZodDefault<z.ZodOptional<z.ZodString>>;
-    fechaInicio: z.ZodString;
-    fechaFin: z.ZodString;
-    metaHoras: z.ZodDefault<z.ZodNumber>;
-    horarioSemanal: z.ZodOptional<z.ZodObject<{
-        lunes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        martes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        miercoles: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        jueves: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        viernes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        sabado: z.ZodOptional<z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>>;
-        domingo: z.ZodOptional<z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>>;
+    fechaInicio: z.ZodOptional<z.ZodString>;
+    fechaFin: z.ZodOptional<z.ZodString>;
+    metaHorasTotal: z.ZodOptional<z.ZodNumber>;
+    metaHoras: z.ZodOptional<z.ZodNumber>;
+    horasInicialesPrevias: z.ZodOptional<z.ZodNumber>;
+    horasMinimasSemanales: z.ZodOptional<z.ZodNumber>;
+    perfilCompletado: z.ZodOptional<z.ZodBoolean>;
+    horarioSemanal: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodObject<{
+        diaSemana: z.ZodOptional<z.ZodString>;
+        activo: z.ZodDefault<z.ZodBoolean>;
+        horaInicio: z.ZodDefault<z.ZodString>;
+        horaFin: z.ZodDefault<z.ZodString>;
+        refrigerioMinutos: z.ZodDefault<z.ZodNumber>;
+        descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
+        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
     }, "strip", z.ZodTypeAny, {
-        lunes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        martes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        miercoles: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        jueves: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        viernes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        sabado?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-        domingo?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
+        activo: boolean;
+        horaInicio: string;
+        horaFin: string;
+        refrigerioMinutos: number;
+        modalidad: "Presencial" | "Remoto" | "Híbrido";
+        diaSemana?: string | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
     }, {
-        lunes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        martes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        miercoles: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        jueves: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        viernes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        sabado?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-        domingo?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-    }>>;
+        diaSemana?: string | undefined;
+        activo?: boolean | undefined;
+        horaInicio?: string | undefined;
+        horaFin?: string | undefined;
+        refrigerioMinutos?: number | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    }>>>;
     horaInicioHabitual: z.ZodOptional<z.ZodString>;
     horaFinHabitual: z.ZodOptional<z.ZodString>;
     descuentoAlmuerzoHabitual: z.ZodOptional<z.ZodNumber>;
@@ -504,63 +95,26 @@ export declare const RegisterSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
-    nombreCompleto: string;
-    fechaInicio: string;
-    fechaFin: string;
-    metaHoras: number;
     carrera: string;
     semestre: string;
-    horarioSemanal?: {
-        lunes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        martes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        miercoles: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        jueves: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        viernes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        sabado?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-        domingo?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-    } | undefined;
+    nombre?: string | undefined;
+    nombreCompleto?: string | undefined;
+    fechaInicio?: string | undefined;
+    fechaFin?: string | undefined;
+    metaHorasTotal?: number | undefined;
+    metaHoras?: number | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        activo: boolean;
+        horaInicio: string;
+        horaFin: string;
+        refrigerioMinutos: number;
+        modalidad: "Presencial" | "Remoto" | "Híbrido";
+        diaSemana?: string | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+    }> | undefined;
     horaInicioHabitual?: string | undefined;
     horaFinHabitual?: string | undefined;
     descuentoAlmuerzoHabitual?: number | undefined;
@@ -568,63 +122,80 @@ export declare const RegisterSchema: z.ZodObject<{
 }, {
     email: string;
     password: string;
-    nombreCompleto: string;
-    fechaInicio: string;
-    fechaFin: string;
+    nombre?: string | undefined;
+    nombreCompleto?: string | undefined;
+    fechaInicio?: string | undefined;
+    fechaFin?: string | undefined;
+    metaHorasTotal?: number | undefined;
     metaHoras?: number | undefined;
-    horarioSemanal?: {
-        lunes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        martes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        miercoles: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        jueves: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        viernes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        sabado?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-        domingo?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-    } | undefined;
     carrera?: string | undefined;
     semestre?: string | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        diaSemana?: string | undefined;
+        activo?: boolean | undefined;
+        horaInicio?: string | undefined;
+        horaFin?: string | undefined;
+        refrigerioMinutos?: number | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    }> | undefined;
+    horaInicioHabitual?: string | undefined;
+    horaFinHabitual?: string | undefined;
+    descuentoAlmuerzoHabitual?: number | undefined;
+    modalidadHabitual?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+}>, {
+    email: string;
+    password: string;
+    carrera: string;
+    semestre: string;
+    nombre?: string | undefined;
+    nombreCompleto?: string | undefined;
+    fechaInicio?: string | undefined;
+    fechaFin?: string | undefined;
+    metaHorasTotal?: number | undefined;
+    metaHoras?: number | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        activo: boolean;
+        horaInicio: string;
+        horaFin: string;
+        refrigerioMinutos: number;
+        modalidad: "Presencial" | "Remoto" | "Híbrido";
+        diaSemana?: string | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+    }> | undefined;
+    horaInicioHabitual?: string | undefined;
+    horaFinHabitual?: string | undefined;
+    descuentoAlmuerzoHabitual?: number | undefined;
+    modalidadHabitual?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+}, {
+    email: string;
+    password: string;
+    nombre?: string | undefined;
+    nombreCompleto?: string | undefined;
+    fechaInicio?: string | undefined;
+    fechaFin?: string | undefined;
+    metaHorasTotal?: number | undefined;
+    metaHoras?: number | undefined;
+    carrera?: string | undefined;
+    semestre?: string | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        diaSemana?: string | undefined;
+        activo?: boolean | undefined;
+        horaInicio?: string | undefined;
+        horaFin?: string | undefined;
+        refrigerioMinutos?: number | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    }> | undefined;
     horaInicioHabitual?: string | undefined;
     horaFinHabitual?: string | undefined;
     descuentoAlmuerzoHabitual?: number | undefined;
@@ -658,376 +229,85 @@ export declare const ResetPasswordSchema: z.ZodObject<{
     newPassword: string;
 }>;
 export declare const UpdateProfileSchema: z.ZodObject<{
+    nombre: z.ZodOptional<z.ZodString>;
     nombreCompleto: z.ZodOptional<z.ZodString>;
     carrera: z.ZodOptional<z.ZodString>;
     semestre: z.ZodOptional<z.ZodString>;
-    fechaInicio: z.ZodOptional<z.ZodString>;
-    fechaFin: z.ZodOptional<z.ZodString>;
+    fechaInicio: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    fechaFin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    metaHorasTotal: z.ZodOptional<z.ZodNumber>;
     metaHoras: z.ZodOptional<z.ZodNumber>;
-    horarioSemanal: z.ZodOptional<z.ZodObject<{
-        lunes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        martes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        miercoles: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        jueves: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        viernes: z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>;
-        sabado: z.ZodOptional<z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>>;
-        domingo: z.ZodOptional<z.ZodObject<{
-            activo: z.ZodDefault<z.ZodBoolean>;
-            horaInicio: z.ZodDefault<z.ZodString>;
-            horaFin: z.ZodDefault<z.ZodString>;
-            descuentoAlmuerzoMinutos: z.ZodDefault<z.ZodNumber>;
-            modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-        }, "strip", z.ZodTypeAny, {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        }, {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        }>>;
+    horasInicialesPrevias: z.ZodOptional<z.ZodNumber>;
+    horasMinimasSemanales: z.ZodOptional<z.ZodNumber>;
+    perfilCompletado: z.ZodOptional<z.ZodBoolean>;
+    horarioSemanal: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodObject<{
+        diaSemana: z.ZodOptional<z.ZodString>;
+        activo: z.ZodDefault<z.ZodBoolean>;
+        horaInicio: z.ZodDefault<z.ZodString>;
+        horaFin: z.ZodDefault<z.ZodString>;
+        refrigerioMinutos: z.ZodDefault<z.ZodNumber>;
+        descuentoAlmuerzoMinutos: z.ZodOptional<z.ZodNumber>;
+        modalidad: z.ZodDefault<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
     }, "strip", z.ZodTypeAny, {
-        lunes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        martes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        miercoles: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        jueves: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        viernes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        sabado?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-        domingo?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
+        activo: boolean;
+        horaInicio: string;
+        horaFin: string;
+        refrigerioMinutos: number;
+        modalidad: "Presencial" | "Remoto" | "Híbrido";
+        diaSemana?: string | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
     }, {
-        lunes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        martes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        miercoles: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        jueves: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        viernes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        sabado?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-        domingo?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-    }>>;
-    horaInicioHabitual: z.ZodOptional<z.ZodString>;
-    horaFinHabitual: z.ZodOptional<z.ZodString>;
-    descuentoAlmuerzoHabitual: z.ZodOptional<z.ZodNumber>;
-    modalidadHabitual: z.ZodOptional<z.ZodEnum<["Presencial", "Remoto", "Híbrido"]>>;
-    avatarUrl: z.ZodOptional<z.ZodString>;
+        diaSemana?: string | undefined;
+        activo?: boolean | undefined;
+        horaInicio?: string | undefined;
+        horaFin?: string | undefined;
+        refrigerioMinutos?: number | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    }>>>;
+    avatarUrl: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
+    nombre?: string | undefined;
     nombreCompleto?: string | undefined;
-    fechaInicio?: string | undefined;
-    fechaFin?: string | undefined;
+    fechaInicio?: string | null | undefined;
+    fechaFin?: string | null | undefined;
+    metaHorasTotal?: number | undefined;
     metaHoras?: number | undefined;
-    horarioSemanal?: {
-        lunes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        martes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        miercoles: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        jueves: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        viernes: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        };
-        sabado?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-        domingo?: {
-            activo: boolean;
-            horaInicio: string;
-            horaFin: string;
-            descuentoAlmuerzoMinutos: number;
-            modalidad: "Presencial" | "Remoto" | "Híbrido";
-        } | undefined;
-    } | undefined;
     carrera?: string | undefined;
     semestre?: string | undefined;
-    horaInicioHabitual?: string | undefined;
-    horaFinHabitual?: string | undefined;
-    descuentoAlmuerzoHabitual?: number | undefined;
-    modalidadHabitual?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    avatarUrl?: string | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        activo: boolean;
+        horaInicio: string;
+        horaFin: string;
+        refrigerioMinutos: number;
+        modalidad: "Presencial" | "Remoto" | "Híbrido";
+        diaSemana?: string | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+    }> | undefined;
+    avatarUrl?: string | null | undefined;
 }, {
+    nombre?: string | undefined;
     nombreCompleto?: string | undefined;
-    fechaInicio?: string | undefined;
-    fechaFin?: string | undefined;
+    fechaInicio?: string | null | undefined;
+    fechaFin?: string | null | undefined;
+    metaHorasTotal?: number | undefined;
     metaHoras?: number | undefined;
-    horarioSemanal?: {
-        lunes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        martes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        miercoles: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        jueves: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        viernes: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        };
-        sabado?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-        domingo?: {
-            activo?: boolean | undefined;
-            horaInicio?: string | undefined;
-            horaFin?: string | undefined;
-            descuentoAlmuerzoMinutos?: number | undefined;
-            modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-        } | undefined;
-    } | undefined;
     carrera?: string | undefined;
     semestre?: string | undefined;
-    horaInicioHabitual?: string | undefined;
-    horaFinHabitual?: string | undefined;
-    descuentoAlmuerzoHabitual?: number | undefined;
-    modalidadHabitual?: "Presencial" | "Remoto" | "Híbrido" | undefined;
-    avatarUrl?: string | undefined;
+    horasInicialesPrevias?: number | undefined;
+    horasMinimasSemanales?: number | undefined;
+    perfilCompletado?: boolean | undefined;
+    horarioSemanal?: Record<string, {
+        diaSemana?: string | undefined;
+        activo?: boolean | undefined;
+        horaInicio?: string | undefined;
+        horaFin?: string | undefined;
+        refrigerioMinutos?: number | undefined;
+        descuentoAlmuerzoMinutos?: number | undefined;
+        modalidad?: "Presencial" | "Remoto" | "Híbrido" | undefined;
+    }> | undefined;
+    avatarUrl?: string | null | undefined;
 }>;

@@ -7,12 +7,6 @@ class SupabaseRegistrosRepository {
     get client() {
         return (0, supabase_config_js_1.getSupabaseAdmin)();
     }
-    calcularHorasComputables(horaInicio, horaFin, descuentoMinutos) {
-        const [hIni, mIni] = horaInicio.split(':').map(Number);
-        const [hFin, mFin] = horaFin.split(':').map(Number);
-        const minutosTotales = hFin * 60 + mFin - (hIni * 60 + mIni) - (descuentoMinutos || 0);
-        return Math.max(0, Math.round((minutosTotales / 60) * 100) / 100);
-    }
     mapRowToEntity(row) {
         return {
             id: row.id,
@@ -26,26 +20,31 @@ class SupabaseRegistrosRepository {
             actividades: row.actividades,
             supervisorNombre: row.supervisor_nombre || undefined,
             estado: row.estado,
+            deletedAt: row.deleted_at || undefined,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
         };
     }
     async crear(userId, data) {
-        const horasComputables = this.calcularHorasComputables(data.horaInicio, data.horaFin, data.descuentoAlmuerzoMinutos);
-        const { data: row, error } = await this.client
-            .from('registros_horas')
-            .insert({
+        const payload = {
             user_id: userId,
             fecha: data.fecha,
             hora_inicio: data.horaInicio,
             hora_fin: data.horaFin,
-            descuento_almuerzo_min: data.descuentoAlmuerzoMinutos,
-            horas_computables: horasComputables,
-            modalidad: data.modalidad,
+            descuento_almuerzo_min: data.descuentoAlmuerzoMinutos ?? data.refrigerioMinutos ?? 0,
+            horas_computables: data.horasComputables ?? 0,
+            modalidad: data.modalidad || 'Presencial',
             actividades: data.actividades,
             supervisor_nombre: data.supervisorNombre || null,
-            estado: 'Aprobado',
-        })
+            estado: data.estado || 'Aprobado',
+        };
+        // Si el cliente móvil envió su propio UUID v4 (generado offline), respetarlo
+        if (data.id) {
+            payload.id = data.id;
+        }
+        const { data: row, error } = await this.client
+            .from('registros_horas')
+            .insert(payload)
             .select('*')
             .single();
         if (error || !row) {
@@ -53,15 +52,48 @@ class SupabaseRegistrosRepository {
         }
         return this.mapRowToEntity(row);
     }
-    async listar(userId, limite) {
+    async listar(userId, filtros) {
         let query = this.client
             .from('registros_horas')
             .select('*')
             .eq('user_id', userId)
+            .is('deleted_at', null)
             .order('fecha', { ascending: false })
             .order('created_at', { ascending: false });
-        if (limite && limite > 0) {
-            query = query.limit(limite);
+        if (filtros) {
+            if (filtros.modalidad) {
+                query = query.eq('modalidad', filtros.modalidad);
+            }
+            if (filtros.desde) {
+                query = query.gte('fecha', filtros.desde);
+            }
+            if (filtros.hasta) {
+                query = query.lte('fecha', filtros.hasta);
+            }
+            if (filtros.mes && filtros.anio) {
+                const mesStr = filtros.mes.toString().padStart(2, '0');
+                const start = `${filtros.anio}-${mesStr}-01`;
+                // Último día del mes
+                const lastDay = new Date(filtros.anio, filtros.mes, 0).getDate();
+                const end = `${filtros.anio}-${mesStr}-${lastDay.toString().padStart(2, '0')}`;
+                query = query.gte('fecha', start).lte('fecha', end);
+            }
+            else if (filtros.mes) {
+                const currentYear = new Date().getFullYear();
+                const mesStr = filtros.mes.toString().padStart(2, '0');
+                const start = `${currentYear}-${mesStr}-01`;
+                const lastDay = new Date(currentYear, filtros.mes, 0).getDate();
+                const end = `${currentYear}-${mesStr}-${lastDay.toString().padStart(2, '0')}`;
+                query = query.gte('fecha', start).lte('fecha', end);
+            }
+            else if (filtros.anio) {
+                const start = `${filtros.anio}-01-01`;
+                const end = `${filtros.anio}-12-31`;
+                query = query.gte('fecha', start).lte('fecha', end);
+            }
+            if (filtros.limite && filtros.limite > 0) {
+                query = query.limit(filtros.limite);
+            }
         }
         const { data, error } = await query;
         if (error) {
@@ -75,6 +107,7 @@ class SupabaseRegistrosRepository {
             .select('*')
             .eq('user_id', userId)
             .eq('id', id)
+            .is('deleted_at', null)
             .maybeSingle();
         if (error) {
             throw new app_error_js_1.BadRequestError(`Error al buscar jornada: ${error.message}`);
@@ -82,25 +115,29 @@ class SupabaseRegistrosRepository {
         return data ? this.mapRowToEntity(data) : null;
     }
     async actualizar(userId, id, data) {
-        const actual = await this.obtenerPorId(userId, id);
-        if (!actual) {
-            throw new app_error_js_1.NotFoundError('El registro de jornada no existe');
-        }
-        const horaInicio = data.horaInicio || actual.horaInicio;
-        const horaFin = data.horaFin || actual.horaFin;
-        const descuentoAlmuerzo = data.descuentoAlmuerzoMinutos !== undefined ? data.descuentoAlmuerzoMinutos : actual.descuentoAlmuerzoMinutos;
-        const horasComputables = this.calcularHorasComputables(horaInicio, horaFin, descuentoAlmuerzo);
         const updatePayload = {
-            ...(data.fecha && { fecha: data.fecha }),
-            ...(data.horaInicio && { hora_inicio: data.horaInicio }),
-            ...(data.horaFin && { hora_fin: data.horaFin }),
-            ...(data.descuentoAlmuerzoMinutos !== undefined && { descuento_almuerzo_min: data.descuentoAlmuerzoMinutos }),
-            horas_computables: horasComputables,
-            ...(data.modalidad && { modalidad: data.modalidad }),
-            ...(data.actividades && { actividades: data.actividades }),
-            ...(data.supervisorNombre !== undefined && { supervisor_nombre: data.supervisorNombre }),
             updated_at: new Date().toISOString(),
         };
+        if (data.fecha)
+            updatePayload.fecha = data.fecha;
+        if (data.horaInicio)
+            updatePayload.hora_inicio = data.horaInicio;
+        if (data.horaFin)
+            updatePayload.hora_fin = data.horaFin;
+        if (data.descuentoAlmuerzoMinutos !== undefined || data.refrigerioMinutos !== undefined) {
+            updatePayload.descuento_almuerzo_min = data.descuentoAlmuerzoMinutos ?? data.refrigerioMinutos;
+        }
+        if (data.horasComputables !== undefined) {
+            updatePayload.horas_computables = data.horasComputables;
+        }
+        if (data.modalidad)
+            updatePayload.modalidad = data.modalidad;
+        if (data.actividades)
+            updatePayload.actividades = data.actividades;
+        if (data.supervisorNombre !== undefined)
+            updatePayload.supervisor_nombre = data.supervisorNombre;
+        if (data.estado)
+            updatePayload.estado = data.estado;
         const { data: row, error } = await this.client
             .from('registros_horas')
             .update(updatePayload)
@@ -123,93 +160,6 @@ class SupabaseRegistrosRepository {
             throw new app_error_js_1.BadRequestError(`Error al eliminar jornada: ${error.message}`);
         }
         return true;
-    }
-    async obtenerKpis(userId) {
-        // 1. Obtener meta de horas del perfil
-        const { data: perfil } = await this.client
-            .from('perfiles')
-            .select('meta_horas')
-            .eq('id', userId)
-            .single();
-        const horasObjetivo = perfil?.meta_horas || 360;
-        // 2. Obtener todas las jornadas del usuario
-        const { data: registros, error } = await this.client
-            .from('registros_horas')
-            .select('horas_computables')
-            .eq('user_id', userId);
-        if (error) {
-            throw new app_error_js_1.BadRequestError(`Error al calcular KPIs: ${error.message}`);
-        }
-        const rows = (registros || []);
-        const jornadasCompletadas = rows.length;
-        let horasAcumuladas = 0;
-        for (const r of rows) {
-            const val = typeof r.horas_computables === 'string' ? parseFloat(r.horas_computables) : r.horas_computables;
-            horasAcumuladas += val || 0;
-        }
-        horasAcumuladas = Math.round(horasAcumuladas * 100) / 100;
-        const porcentajeAvance = horasObjetivo > 0
-            ? Math.min(100, Math.round((horasAcumuladas / horasObjetivo) * 1000) / 10)
-            : 0;
-        const promedioHorasDiarias = jornadasCompletadas > 0
-            ? Math.round((horasAcumuladas / jornadasCompletadas) * 10) / 10
-            : 0;
-        const horasFaltantes = Math.max(0, horasObjetivo - horasAcumuladas);
-        const diasRestantesEstimados = promedioHorasDiarias > 0
-            ? Math.ceil(horasFaltantes / promedioHorasDiarias)
-            : (horasObjetivo > 0 ? Math.ceil(horasObjetivo / 6) : 0);
-        return {
-            horasAcumuladas,
-            horasObjetivo,
-            porcentajeAvance,
-            jornadasCompletadas,
-            promedioHorasDiarias,
-            diasRestantesEstimados,
-        };
-    }
-    async obtenerRendimientoSemanal(userId) {
-        // Obtener los últimos 7 días con fecha
-        const hoy = new Date();
-        const lunes = new Date(hoy);
-        const day = hoy.getDay();
-        const diff = (day === 0 ? -6 : 1) - day; // Lunes como inicio
-        lunes.setDate(hoy.getDate() + diff);
-        const diasSemana = [];
-        const nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        const inicioIso = lunes.toISOString().split('T')[0];
-        const finSemana = new Date(lunes);
-        finSemana.setDate(lunes.getDate() + 6);
-        const finIso = finSemana.toISOString().split('T')[0];
-        const { data: registros } = await this.client
-            .from('registros_horas')
-            .select('fecha, horas_computables, modalidad')
-            .eq('user_id', userId)
-            .gte('fecha', inicioIso)
-            .lte('fecha', finIso);
-        const rows = (registros || []);
-        let totalHorasSemana = 0;
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(lunes);
-            d.setDate(lunes.getDate() + i);
-            const fechaStr = d.toISOString().split('T')[0];
-            const match = rows.find((r) => r.fecha === fechaStr);
-            const horas = match
-                ? (typeof match.horas_computables === 'string' ? parseFloat(match.horas_computables) : match.horas_computables)
-                : 0;
-            totalHorasSemana += horas;
-            diasSemana.push({
-                fecha: fechaStr,
-                diaNombre: nombresDias[i],
-                horasRegistradas: Math.round(horas * 10) / 10,
-                modalidad: match?.modalidad || 'Presencial',
-                horasMetaDia: 6,
-            });
-        }
-        return {
-            semanaEtiqueta: `Semana del ${lunes.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })} al ${finSemana.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}`,
-            totalHorasSemana: Math.round(totalHorasSemana * 10) / 10,
-            dias: diasSemana,
-        };
     }
 }
 exports.SupabaseRegistrosRepository = SupabaseRegistrosRepository;

@@ -24,7 +24,9 @@ class AuthController {
             const session = await this.registerUseCase.execute(req.body);
             res.status(201).json({
                 success: true,
-                message: 'Cuenta de practicante creada exitosamente.',
+                token: session.token,
+                refreshToken: session.refreshToken,
+                user: session.user,
                 data: session,
             });
         }
@@ -41,7 +43,9 @@ class AuthController {
             });
             res.status(200).json({
                 success: true,
-                message: 'Sesión iniciada correctamente.',
+                token: session.token,
+                refreshToken: session.refreshToken,
+                user: session.user,
                 data: session,
             });
         }
@@ -58,7 +62,6 @@ class AuthController {
                 message: 'Si la dirección está registrada, hemos enviado las instrucciones de recuperación.',
                 data: {
                     expiraEn: result.expiraEn,
-                    // En entornos no productivos retornamos el token para facilitar pruebas locales
                     ...(process.env['NODE_ENV'] !== 'production' ? { devResetToken: result.token } : {}),
                 },
             });
@@ -85,10 +88,7 @@ class AuthController {
                 throw new app_error_js_1.UnauthorizedError('Usuario no identificado');
             }
             const profile = await this.getCurrentUserUseCase.execute(req.user.id);
-            res.status(200).json({
-                success: true,
-                data: profile,
-            });
+            res.status(200).json(profile);
         }
         catch (error) {
             next(error);
@@ -100,11 +100,7 @@ class AuthController {
                 throw new app_error_js_1.UnauthorizedError('Usuario no identificado');
             }
             const updatedProfile = await this.updateProfileUseCase.execute(req.user.id, req.body);
-            res.status(200).json({
-                success: true,
-                message: 'Perfil actualizado exitosamente.',
-                data: updatedProfile,
-            });
+            res.status(200).json(updatedProfile);
         }
         catch (error) {
             next(error);

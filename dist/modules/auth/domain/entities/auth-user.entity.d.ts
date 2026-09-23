@@ -1,40 +1,44 @@
-export interface DiaHorario {
+export type ModalidadTrabajo = 'Presencial' | 'Remoto' | 'Híbrido';
+export interface HorarioDia {
+    diaSemana: 'lunes' | 'martes' | 'miercoles' | 'jueves' | 'viernes' | 'sabado' | 'domingo' | string;
     activo: boolean;
     horaInicio: string;
     horaFin: string;
-    descuentoAlmuerzoMinutos: number;
-    modalidad: 'Presencial' | 'Remoto' | 'Híbrido';
+    refrigerioMinutos: number;
+    modalidad: ModalidadTrabajo;
 }
-export interface HorarioSemanal {
-    lunes: DiaHorario;
-    martes: DiaHorario;
-    miercoles: DiaHorario;
-    jueves: DiaHorario;
-    viernes: DiaHorario;
-    sabado: DiaHorario;
-    domingo: DiaHorario;
-}
+export type HorarioSemanal = {
+    lunes: HorarioDia;
+    martes: HorarioDia;
+    miercoles: HorarioDia;
+    jueves: HorarioDia;
+    viernes: HorarioDia;
+    sabado: HorarioDia;
+    domingo: HorarioDia;
+};
+export declare const defaultHorarioSemanal: HorarioSemanal;
 export interface UserProfile {
     id: string;
     email: string;
-    nombreCompleto: string;
+    nombre: string;
+    nombreCompleto?: string;
     carrera?: string;
     semestre?: string;
-    fechaInicio: string;
-    fechaFin: string;
-    metaHoras: number;
-    horarioSemanal?: HorarioSemanal;
-    horaInicioHabitual?: string;
-    horaFinHabitual?: string;
-    descuentoAlmuerzoHabitual?: number;
-    modalidadHabitual?: 'Presencial' | 'Remoto' | 'Híbrido';
+    metaHorasTotal: number;
+    metaHoras?: number;
+    horasInicialesPrevias: number;
+    horasMinimasSemanales: number;
+    perfilCompletado: boolean;
+    fechaInicio?: string | null;
+    fechaFin?: string | null;
+    horarioSemanal: HorarioSemanal;
     avatarUrl?: string;
     createdAt?: string;
     updatedAt?: string;
 }
 export interface UserSession {
     user: UserProfile;
-    accessToken: string;
+    token: string;
     refreshToken?: string;
     expiresIn?: number;
 }

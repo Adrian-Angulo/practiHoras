@@ -4,7 +4,10 @@ import helmet from 'helmet';
 import { ENV } from './config/env.config.js';
 import { errorHandler } from './core/middlewares/error.middleware.js';
 import authRoutes from './modules/auth/presentation/auth.routes.js';
+import profileRoutes from './modules/profile/presentation/profile.routes.js';
 import registrosRoutes from './modules/registros/presentation/registros.routes.js';
+import metricasRoutes from './modules/metricas/presentation/metricas.routes.js';
+import syncRoutes from './modules/sync/presentation/sync.routes.js';
 
 export const createApp = (): Express => {
   const app = express();
@@ -13,26 +16,33 @@ export const createApp = (): Express => {
   app.use(helmet());
   app.use(
     cors({
-      origin: [ENV.CLIENT_ORIGIN, 'http://localhost:4200', 'http://localhost:3000'],
+      origin: (_origin, callback) => {
+        // Permitir peticiones desde apps móviles (sin origin) y orígenes autorizados
+        callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     })
   );
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // 2. Root & Health check endpoints
   app.get('/', (_req: Request, res: Response) => {
     res.status(200).json({
       name: 'PractiHoras Backend API',
       status: 'ONLINE',
-      frontendUrl: 'http://localhost:4200',
-      description: 'API REST conectada con Supabase para la gestión de prácticas pre-profesionales.',
+      architecture: 'Clean Architecture & SOLID',
+      description: 'API REST compatible con Frontend Web y Frontend Móvil (Flutter)',
       endpoints: {
         health: '/api/health',
         auth: '/api/v1/auth',
+        profile: '/api/v1/profile',
         registros: '/api/v1/registros',
+        metricas: '/api/v1/metricas/dashboard',
+        sync: '/api/v1/sync/batch',
+        exportCsv: '/api/v1/registros/export/csv',
       },
     });
   });
@@ -42,22 +52,24 @@ export const createApp = (): Express => {
       status: 'UP',
       timestamp: new Date().toISOString(),
       environment: ENV.NODE_ENV,
-      version: '1.0.0',
+      version: '1.1.0',
     });
   });
 
-  // 3. Montar Módulos
+  // 3. Montar Módulos de la API
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/profile', profileRoutes);
   app.use('/api/v1/registros', registrosRoutes);
+  app.use('/api/v1/metricas', metricasRoutes);
+  app.use('/api/v1/sync', syncRoutes);
 
   // 4. Fallback 404
   app.use((_req: Request, res: Response) => {
     res.status(404).json({
-      success: false,
-      error: {
-        code: 'NOT_FOUND',
-        message: 'La ruta solicitada no existe en este servidor API.',
-      },
+      statusCode: 400,
+      error: 'Not Found',
+      message: 'La ruta solicitada no existe en este servidor API.',
+      timestamp: new Date().toISOString(),
     });
   });
 

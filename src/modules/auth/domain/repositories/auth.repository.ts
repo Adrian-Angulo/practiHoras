@@ -3,12 +3,17 @@ import { HorarioSemanal, UserProfile, UserSession } from '../entities/auth-user.
 export interface RegisterDTO {
   email: string;
   password: string;
-  nombreCompleto: string;
+  nombre?: string;
+  nombreCompleto?: string;
   carrera?: string;
   semestre?: string;
-  fechaInicio: string;
-  fechaFin: string;
-  metaHoras: number;
+  fechaInicio?: string;
+  fechaFin?: string;
+  metaHorasTotal?: number;
+  metaHoras?: number;
+  horasInicialesPrevias?: number;
+  horasMinimasSemanales?: number;
+  perfilCompletado?: boolean;
   horarioSemanal?: HorarioSemanal;
   horaInicioHabitual?: string;
   horaFinHabitual?: string;
@@ -28,17 +33,18 @@ export interface ResetPasswordDTO {
 }
 
 export interface UpdateProfileDTO {
+  nombre?: string;
   nombreCompleto?: string;
   carrera?: string;
   semestre?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
+  fechaInicio?: string | null;
+  fechaFin?: string | null;
+  metaHorasTotal?: number;
   metaHoras?: number;
+  horasInicialesPrevias?: number;
+  horasMinimasSemanales?: number;
+  perfilCompletado?: boolean;
   horarioSemanal?: HorarioSemanal;
-  horaInicioHabitual?: string;
-  horaFinHabitual?: string;
-  descuentoAlmuerzoHabitual?: number;
-  modalidadHabitual?: 'Presencial' | 'Remoto' | 'Híbrido';
   avatarUrl?: string;
 }
 

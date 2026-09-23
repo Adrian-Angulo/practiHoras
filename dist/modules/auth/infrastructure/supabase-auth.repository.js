@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SupabaseAuthRepository = void 0;
+const auth_user_entity_js_1 = require("../domain/entities/auth-user.entity.js");
 const app_error_js_1 = require("../../../core/errors/app-error.js");
 const supabase_config_js_1 = require("../../../config/supabase.config.js");
 const crypto_util_js_1 = require("../../../core/utils/crypto.util.js");
@@ -13,23 +14,26 @@ class SupabaseAuthRepository {
      */
     async register(data) {
         const cleanEmail = data.email.trim().toLowerCase();
-        // 1. Crear usuario en Supabase Auth con metadata de negocio
+        const nombreFinal = data.nombre || data.nombreCompleto || cleanEmail.split('@')[0] || 'Practicante';
+        const metaTotal = data.metaHorasTotal ?? data.metaHoras ?? 360;
+        // 1. Crear usuario en Supabase Auth con metadata
         const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
             email: cleanEmail,
             password: data.password,
-            email_confirm: true, // Confirmar automáticamente para entornos de prácticas
+            email_confirm: true,
             user_metadata: {
-                nombreCompleto: data.nombreCompleto,
+                nombre: nombreFinal,
+                nombreCompleto: nombreFinal,
                 carrera: data.carrera || 'Ingeniería de Software',
                 semestre: data.semestre || 'Semestre 2025-1',
                 fechaInicio: data.fechaInicio,
                 fechaFin: data.fechaFin,
-                metaHoras: data.metaHoras,
-                horarioSemanal: data.horarioSemanal,
-                horaInicioHabitual: data.horaInicioHabitual || '08:00:00',
-                horaFinHabitual: data.horaFinHabitual || '17:00:00',
-                descuentoAlmuerzoHabitual: data.descuentoAlmuerzoHabitual ?? 0,
-                modalidadHabitual: data.modalidadHabitual || 'Presencial',
+                metaHorasTotal: metaTotal,
+                metaHoras: metaTotal,
+                horasInicialesPrevias: data.horasInicialesPrevias ?? 0,
+                horasMinimasSemanales: data.horasMinimasSemanales ?? 30,
+                perfilCompletado: data.perfilCompletado ?? false,
+                horarioSemanal: data.horarioSemanal || auth_user_entity_js_1.defaultHorarioSemanal,
             },
         });
         if (authError || !authData.user) {
@@ -43,50 +47,52 @@ class SupabaseAuthRepository {
         const profileRecord = {
             id: userId,
             email: cleanEmail,
-            nombre_completo: data.nombreCompleto,
+            nombre: nombreFinal,
+            nombre_completo: nombreFinal,
             carrera: data.carrera || 'Ingeniería de Software',
             semestre: data.semestre || 'Semestre 2025-1',
-            fecha_inicio: data.fechaInicio,
-            fecha_fin: data.fechaFin,
-            meta_horas: data.metaHoras,
-            hora_inicio_habitual: data.horaInicioHabitual || '08:00:00',
-            hora_fin_habitual: data.horaFinHabitual || '17:00:00',
-            descuento_almuerzo_min: data.descuentoAlmuerzoHabitual ?? 0,
-            modalidad_habitual: data.modalidadHabitual || 'Presencial',
+            meta_horas_total: metaTotal,
+            meta_horas: Math.round(metaTotal),
+            horas_iniciales_previas: data.horasInicialesPrevias ?? 0,
+            horas_minimas_semanales: data.horasMinimasSemanales ?? 30,
+            perfil_completado: data.perfilCompletado ?? false,
+            fecha_inicio: data.fechaInicio || null,
+            fecha_fin: data.fechaFin || null,
+            horario_semanal: data.horarioSemanal || auth_user_entity_js_1.defaultHorarioSemanal,
         };
-        if (data.horarioSemanal) {
-            profileRecord['horario_semanal'] = data.horarioSemanal;
-        }
         const { error: profileError } = await this.supabaseAdmin
             .from('perfiles')
             .upsert(profileRecord, { onConflict: 'id' });
         if (profileError) {
             console.error('Error insertando perfil en Supabase:', profileError);
+            throw new app_error_js_1.BadRequestError(`Error al guardar perfil: ${profileError.message}`);
         }
         // 3. Iniciar sesión inmediata para generar token de acceso
         const { data: sessionData, error: sessionError } = await this.supabaseAnon.auth.signInWithPassword({
             email: cleanEmail,
             password: data.password,
         });
-        const accessToken = sessionData?.session?.access_token || 'mock-token-session';
+        const accessToken = sessionData?.session?.access_token || '';
         const refreshToken = sessionData?.session?.refresh_token;
         const userProfile = {
             id: userId,
             email: cleanEmail,
-            nombreCompleto: data.nombreCompleto,
+            nombre: nombreFinal,
+            nombreCompleto: nombreFinal,
             carrera: data.carrera || 'Ingeniería de Software',
             semestre: data.semestre || 'Semestre 2025-1',
-            fechaInicio: data.fechaInicio,
-            fechaFin: data.fechaFin,
-            metaHoras: data.metaHoras,
-            horaInicioHabitual: data.horaInicioHabitual || '08:00',
-            horaFinHabitual: data.horaFinHabitual || '17:00',
-            descuentoAlmuerzoHabitual: data.descuentoAlmuerzoHabitual ?? 60,
-            modalidadHabitual: data.modalidadHabitual || 'Presencial',
+            fechaInicio: data.fechaInicio || null,
+            fechaFin: data.fechaFin || null,
+            metaHorasTotal: metaTotal,
+            metaHoras: metaTotal,
+            horasInicialesPrevias: data.horasInicialesPrevias ?? 0,
+            horasMinimasSemanales: data.horasMinimasSemanales ?? 30,
+            perfilCompletado: data.perfilCompletado ?? false,
+            horarioSemanal: data.horarioSemanal || auth_user_entity_js_1.defaultHorarioSemanal,
         };
         return {
             user: userProfile,
-            accessToken,
+            token: accessToken,
             refreshToken,
             expiresIn: sessionData?.session?.expires_in,
         };
@@ -104,7 +110,6 @@ class SupabaseAuthRepository {
             password: data.password,
         });
         if (authError || !authData.user || !authData.session) {
-            // Registrar intento fallido
             await this.registerFailedAttempt(cleanEmail, data.ipAddress);
             throw new app_error_js_1.UnauthorizedError('Credenciales incorrectas. Verifica tu correo y contraseña.');
         }
@@ -115,18 +120,20 @@ class SupabaseAuthRepository {
         const userProfile = profile || {
             id: authData.user.id,
             email: cleanEmail,
-            nombreCompleto: authData.user.user_metadata?.['nombreCompleto'] || cleanEmail.split('@')[0],
-            fechaInicio: authData.user.user_metadata?.['fechaInicio'] || '2025-01-15',
-            fechaFin: authData.user.user_metadata?.['fechaFin'] || '2025-06-30',
-            metaHoras: authData.user.user_metadata?.['metaHoras'] || 360,
-            horaInicioHabitual: '08:00',
-            horaFinHabitual: '17:00',
-            descuentoAlmuerzoHabitual: 60,
-            modalidadHabitual: 'Presencial',
+            nombre: authData.user.user_metadata?.['nombre'] || authData.user.user_metadata?.['nombreCompleto'] || cleanEmail.split('@')[0],
+            nombreCompleto: authData.user.user_metadata?.['nombreCompleto'] || authData.user.user_metadata?.['nombre'] || cleanEmail.split('@')[0],
+            metaHorasTotal: 360,
+            metaHoras: 360,
+            horasInicialesPrevias: 0,
+            horasMinimasSemanales: 30,
+            perfilCompletado: false,
+            fechaInicio: null,
+            fechaFin: null,
+            horarioSemanal: auth_user_entity_js_1.defaultHorarioSemanal,
         };
         return {
             user: userProfile,
-            accessToken: authData.session.access_token,
+            token: authData.session.access_token,
             refreshToken: authData.session.refresh_token,
             expiresIn: authData.session.expires_in,
         };
@@ -136,20 +143,16 @@ class SupabaseAuthRepository {
      */
     async requestPasswordReset(email, ipAddress) {
         const cleanEmail = email.trim().toLowerCase();
-        // 1. Buscar usuario por email
         const profile = await this.getProfileByEmail(cleanEmail);
         if (!profile) {
-            // Por seguridad anti-enumeración, no lanzamos error visible si no existe
             return {
                 token: 'token-simulado',
                 expiraEn: new Date(Date.now() + env_config_js_1.ENV.RESET_TOKEN_EXPIRATION_MINUTES * 60 * 1000),
             };
         }
-        // 2. Generar token criptográfico único
         const plainToken = crypto_util_js_1.CryptoUtil.generateRandomToken(24);
         const tokenHash = crypto_util_js_1.CryptoUtil.hashToken(plainToken);
         const expiraEn = new Date(Date.now() + env_config_js_1.ENV.RESET_TOKEN_EXPIRATION_MINUTES * 60 * 1000);
-        // 3. Guardar hash en public.tokens_recuperacion
         await this.supabaseAdmin.from('tokens_recuperacion').insert({
             user_id: profile.id,
             email: cleanEmail,
@@ -167,7 +170,6 @@ class SupabaseAuthRepository {
      */
     async resetPassword(data) {
         const tokenHash = crypto_util_js_1.CryptoUtil.hashToken(data.token.trim());
-        // 1. Buscar token activo y no utilizado
         const { data: tokenRecord, error } = await this.supabaseAdmin
             .from('tokens_recuperacion')
             .select('*')
@@ -181,14 +183,12 @@ class SupabaseAuthRepository {
             throw new app_error_js_1.BadRequestError('El enlace de recuperación es inválido o ha expirado.');
         }
         const userId = tokenRecord.user_id;
-        // 2. Actualizar contraseña del usuario en Supabase Auth
         const { error: updateAuthError } = await this.supabaseAdmin.auth.admin.updateUserById(userId, {
             password: data.newPassword,
         });
         if (updateAuthError) {
             throw new app_error_js_1.BadRequestError(updateAuthError.message || 'Error al actualizar la contraseña del usuario.');
         }
-        // 3. Marcar token como utilizado
         await this.supabaseAdmin
             .from('tokens_recuperacion')
             .update({
@@ -205,7 +205,7 @@ class SupabaseAuthRepository {
             .from('perfiles')
             .select('*')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
         if (error || !data)
             return null;
         return this.mapToDomainProfile(data);
@@ -218,7 +218,7 @@ class SupabaseAuthRepository {
             .from('perfiles')
             .select('*')
             .eq('email', email.trim().toLowerCase())
-            .single();
+            .maybeSingle();
         if (error || !data)
             return null;
         return this.mapToDomainProfile(data);
@@ -227,9 +227,14 @@ class SupabaseAuthRepository {
      * Actualizar configuración de perfil
      */
     async updateProfile(userId, data) {
-        const updatePayload = {};
-        if (data.nombreCompleto !== undefined)
-            updatePayload['nombre_completo'] = data.nombreCompleto;
+        const updatePayload = {
+            updated_at: new Date().toISOString(),
+        };
+        if (data.nombre !== undefined || data.nombreCompleto !== undefined) {
+            const n = data.nombre || data.nombreCompleto;
+            updatePayload['nombre'] = n;
+            updatePayload['nombre_completo'] = n;
+        }
         if (data.carrera !== undefined)
             updatePayload['carrera'] = data.carrera;
         if (data.semestre !== undefined)
@@ -238,18 +243,19 @@ class SupabaseAuthRepository {
             updatePayload['fecha_inicio'] = data.fechaInicio;
         if (data.fechaFin !== undefined)
             updatePayload['fecha_fin'] = data.fechaFin;
-        if (data.metaHoras !== undefined)
-            updatePayload['meta_horas'] = data.metaHoras;
+        if (data.metaHorasTotal !== undefined || data.metaHoras !== undefined) {
+            const m = data.metaHorasTotal ?? data.metaHoras;
+            updatePayload['meta_horas_total'] = m;
+            updatePayload['meta_horas'] = Math.round(m);
+        }
+        if (data.horasInicialesPrevias !== undefined)
+            updatePayload['horas_iniciales_previas'] = data.horasInicialesPrevias;
+        if (data.horasMinimasSemanales !== undefined)
+            updatePayload['horas_minimas_semanales'] = data.horasMinimasSemanales;
+        if (data.perfilCompletado !== undefined)
+            updatePayload['perfil_completado'] = data.perfilCompletado;
         if (data.horarioSemanal !== undefined)
             updatePayload['horario_semanal'] = data.horarioSemanal;
-        if (data.horaInicioHabitual !== undefined)
-            updatePayload['hora_inicio_habitual'] = data.horaInicioHabitual;
-        if (data.horaFinHabitual !== undefined)
-            updatePayload['hora_fin_habitual'] = data.horaFinHabitual;
-        if (data.descuentoAlmuerzoHabitual !== undefined)
-            updatePayload['descuento_almuerzo_min'] = data.descuentoAlmuerzoHabitual;
-        if (data.modalidadHabitual !== undefined)
-            updatePayload['modalidad_habitual'] = data.modalidadHabitual;
         if (data.avatarUrl !== undefined)
             updatePayload['avatar_url'] = data.avatarUrl;
         const { data: updated, error } = await this.supabaseAdmin
@@ -267,7 +273,12 @@ class SupabaseAuthRepository {
      * Cierre de sesión y revocación
      */
     async logout(token) {
-        await this.supabaseAnon.auth.admin.signOut(token);
+        try {
+            await this.supabaseAnon.auth.admin.signOut(token);
+        }
+        catch {
+            // Ignorar error si el token ya no es válido en Supabase
+        }
     }
     // ============================================================================
     // MÉTODOS PRIVADOS: Anti-Fuerza Bruta & Mappers
@@ -277,7 +288,7 @@ class SupabaseAuthRepository {
             .from('intentos_login')
             .select('intentos_fallidos, bloqueado_hasta')
             .eq('email', email)
-            .single();
+            .maybeSingle();
         if (data && data.bloqueado_hasta) {
             const lockDate = new Date(data.bloqueado_hasta);
             const now = new Date();
@@ -292,7 +303,7 @@ class SupabaseAuthRepository {
             .from('intentos_login')
             .select('id, intentos_fallidos')
             .eq('email', email)
-            .single();
+            .maybeSingle();
         const currentAttempts = (data?.intentos_fallidos || 0) + 1;
         let bloqueadoHasta = null;
         if (currentAttempts >= env_config_js_1.ENV.LOGIN_MAX_FAILED_ATTEMPTS) {
@@ -311,21 +322,29 @@ class SupabaseAuthRepository {
         await this.supabaseAdmin.from('intentos_login').delete().eq('email', email);
     }
     mapToDomainProfile(raw) {
+        const parseNum = (val, fallback) => {
+            if (val === null || val === undefined)
+                return fallback;
+            const parsed = typeof val === 'string' ? parseFloat(val) : Number(val);
+            return isNaN(parsed) ? fallback : parsed;
+        };
+        const nombre = raw.nombre || raw.nombre_completo || raw.email.split('@')[0] || 'Practicante';
         return {
             id: raw.id,
             email: raw.email,
-            nombreCompleto: raw.nombre_completo,
-            carrera: raw.carrera,
-            semestre: raw.semestre,
-            fechaInicio: raw.fecha_inicio,
-            fechaFin: raw.fecha_fin,
-            metaHoras: raw.meta_horas,
-            horarioSemanal: raw.horario_semanal,
-            horaInicioHabitual: (raw.hora_inicio_habitual || '08:00:00').substring(0, 5),
-            horaFinHabitual: (raw.hora_fin_habitual || '17:00:00').substring(0, 5),
-            descuentoAlmuerzoHabitual: raw.descuento_almuerzo_min ?? 0,
-            modalidadHabitual: raw.modalidad_habitual || 'Presencial',
-            avatarUrl: raw.avatar_url,
+            nombre: nombre,
+            nombreCompleto: raw.nombre_completo || nombre,
+            carrera: raw.carrera || 'Ingeniería de Software',
+            semestre: raw.semestre || 'Semestre 2025-1',
+            metaHorasTotal: parseNum(raw.meta_horas_total ?? raw.meta_horas, 360),
+            metaHoras: parseNum(raw.meta_horas ?? raw.meta_horas_total, 360),
+            horasInicialesPrevias: parseNum(raw.horas_iniciales_previas, 0),
+            horasMinimasSemanales: parseNum(raw.horas_minimas_semanales, 30),
+            perfilCompletado: Boolean(raw.perfil_completado),
+            fechaInicio: raw.fecha_inicio ? raw.fecha_inicio.split('T')[0] : null,
+            fechaFin: raw.fecha_fin ? raw.fecha_fin.split('T')[0] : null,
+            horarioSemanal: raw.horario_semanal || auth_user_entity_js_1.defaultHorarioSemanal,
+            avatarUrl: raw.avatar_url || undefined,
             createdAt: raw.created_at,
             updatedAt: raw.updated_at,
         };

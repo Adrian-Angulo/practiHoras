@@ -12,19 +12,26 @@ export interface RegistroHora {
   modalidad: Modalidad;
   actividades: string;
   supervisorNombre?: string | null;
-  estado: EstadoRegistro;
+  estado?: EstadoRegistro;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CrearRegistroDTO {
+  id?: string; // Soportar UUID provisto por el cliente en modo Offline-First
   fecha: string;
   horaInicio: string;
   horaFin: string;
-  descuentoAlmuerzoMinutos: number;
+  descuentoAlmuerzoMinutos?: number;
+  refrigerioMinutos?: number; // Alias para compatibilidad
+  horasComputables?: number;
   modalidad: Modalidad;
   actividades: string;
   supervisorNombre?: string | null;
+  estado?: EstadoRegistro;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ActualizarRegistroDTO {
@@ -32,30 +39,20 @@ export interface ActualizarRegistroDTO {
   horaInicio?: string;
   horaFin?: string;
   descuentoAlmuerzoMinutos?: number;
+  refrigerioMinutos?: number;
+  horasComputables?: number;
   modalidad?: Modalidad;
   actividades?: string;
   supervisorNombre?: string | null;
+  estado?: EstadoRegistro;
+  updatedAt?: string;
 }
 
-export interface ResumenKpis {
-  horasAcumuladas: number;
-  horasObjetivo: number;
-  porcentajeAvance: number;
-  jornadasCompletadas: number;
-  promedioHorasDiarias: number;
-  diasRestantesEstimados: number;
-}
-
-export interface DiaRendimiento {
-  fecha: string;
-  diaNombre: string;
-  horasRegistradas: number;
-  modalidad: Modalidad;
-  horasMetaDia: number;
-}
-
-export interface RendimientoSemanal {
-  semanaEtiqueta: string;
-  totalHorasSemana: number;
-  dias: DiaRendimiento[];
+export interface FiltrosRegistrosDTO {
+  mes?: number;
+  anio?: number;
+  modalidad?: Modalidad;
+  desde?: string; // YYYY-MM-DD
+  hasta?: string; // YYYY-MM-DD
+  limite?: number;
 }

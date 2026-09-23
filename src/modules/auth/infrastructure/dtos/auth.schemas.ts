@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const DiaHorarioSchema = z.object({
+  diaSemana: z.string().optional(),
   activo: z.boolean().default(true),
   horaInicio: z
     .string()
@@ -9,27 +10,20 @@ export const DiaHorarioSchema = z.object({
   horaFin: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, 'Formato de hora inválido (HH:mm)')
-    .default('17:00'),
-  descuentoAlmuerzoMinutos: z
+    .default('13:00'),
+  refrigerioMinutos: z
     .number()
     .int()
     .min(0)
     .max(180)
     .default(0),
+  descuentoAlmuerzoMinutos: z.number().int().min(0).max(180).optional(),
   modalidad: z
     .enum(['Presencial', 'Remoto', 'Híbrido'])
     .default('Presencial'),
 });
 
-export const HorarioSemanalSchema = z.object({
-  lunes: DiaHorarioSchema,
-  martes: DiaHorarioSchema,
-  miercoles: DiaHorarioSchema,
-  jueves: DiaHorarioSchema,
-  viernes: DiaHorarioSchema,
-  sabado: DiaHorarioSchema.optional(),
-  domingo: DiaHorarioSchema.optional(),
-});
+export const HorarioSemanalSchema = z.record(DiaHorarioSchema);
 
 export const RegisterSchema = z.object({
   email: z
@@ -39,26 +33,24 @@ export const RegisterSchema = z.object({
     .toLowerCase(),
   password: z
     .string({ required_error: 'La contraseña es requerida' })
-    .min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  nombreCompleto: z
-    .string({ required_error: 'El nombre completo es requerido' })
-    .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(100, 'El nombre no puede exceder 100 caracteres')
-    .trim(),
+    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional(),
+  nombreCompleto: z.string().min(2).optional(),
   carrera: z.string().optional().default('Ingeniería de Software'),
   semestre: z.string().optional().default('Semestre 2025-1'),
   fechaInicio: z
-    .string({ required_error: 'La fecha de inicio es requerida' })
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)')
+    .optional(),
   fechaFin: z
-    .string({ required_error: 'La fecha de fin es requerida' })
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
-  metaHoras: z
-    .number({ required_error: 'La meta de horas es requerida' })
-    .int('La meta debe ser un número entero')
-    .min(100, 'La meta mínima es de 100 horas')
-    .max(1200, 'La meta máxima es de 1200 horas')
-    .default(360),
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)')
+    .optional(),
+  metaHorasTotal: z.number().positive().max(1200).optional(),
+  metaHoras: z.number().positive().max(1200).optional(),
+  horasInicialesPrevias: z.number().min(0).optional(),
+  horasMinimasSemanales: z.number().min(0).optional(),
+  perfilCompletado: z.boolean().optional(),
   horarioSemanal: HorarioSemanalSchema.optional(),
   horaInicioHabitual: z
     .string()
@@ -77,7 +69,10 @@ export const RegisterSchema = z.object({
   modalidadHabitual: z
     .enum(['Presencial', 'Remoto', 'Híbrido'])
     .optional(),
-});
+}).refine(
+  (data) => Boolean(data.nombre || data.nombreCompleto),
+  { message: 'El nombre es requerido', path: ['nombre'] }
+);
 
 export const LoginSchema = z.object({
   email: z
@@ -102,20 +97,21 @@ export const ResetPasswordSchema = z.object({
   token: z.string({ required_error: 'El token de recuperación es requerido' }).min(10, 'Token inválido'),
   newPassword: z
     .string({ required_error: 'La nueva contraseña es requerida' })
-    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres'),
+    .min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
 });
 
 export const UpdateProfileSchema = z.object({
-  nombreCompleto: z.string().min(3).max(100).optional(),
+  nombre: z.string().min(2).optional(),
+  nombreCompleto: z.string().min(2).optional(),
   carrera: z.string().optional(),
   semestre: z.string().optional(),
-  fechaInicio: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  fechaFin: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  metaHoras: z.number().int().min(100).max(1200).optional(),
+  fechaInicio: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  fechaFin: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  metaHorasTotal: z.number().positive().max(1200).optional(),
+  metaHoras: z.number().positive().max(1200).optional(),
+  horasInicialesPrevias: z.number().min(0).optional(),
+  horasMinimasSemanales: z.number().min(0).optional(),
+  perfilCompletado: z.boolean().optional(),
   horarioSemanal: HorarioSemanalSchema.optional(),
-  horaInicioHabitual: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/).optional(),
-  horaFinHabitual: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/).optional(),
-  descuentoAlmuerzoHabitual: z.number().int().min(0).max(180).optional(),
-  modalidadHabitual: z.enum(['Presencial', 'Remoto', 'Híbrido']).optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().url().optional().nullable(),
 });

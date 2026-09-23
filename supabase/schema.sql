@@ -1,9 +1,9 @@
 -- ==============================================================================
--- PRACTIHORAS - ESQUEMA DE BASE DE DATOS SUPABASE (POSTGRESQL) DESDE CERO
--- Módulo de Autenticación, Perfiles con Horario Semanal Multidía y Registro de Horas
+-- PRACTIHORAS - ESQUEMA DE BASE DE DATOS SUPABASE (POSTGRESQL)
+-- Clean Architecture & SOLID — Compatible con Frontend Web y Frontend Móvil (Flutter)
 -- ==============================================================================
 
--- 1. LIMPIEZA INICIAL (RESET COMPLETO)
+-- 1. LIMPIEZA INICIAL (RESET SEGURO)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP TRIGGER IF EXISTS trg_perfiles_updated_at ON public.perfiles;
 DROP TRIGGER IF EXISTS trg_registros_horas_updated_at ON public.registros_horas;
@@ -23,41 +23,45 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ==============================================================================
 -- 3. TABLA: public.perfiles
 -- Vinculada 1 a 1 con auth.users mediante UUID
--- Incluye horario_semanal JSONB con configuración día a día (Lunes a Domingo)
 -- ==============================================================================
 CREATE TABLE public.perfiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL UNIQUE,
-    nombre_completo TEXT NOT NULL,
+    nombre TEXT NOT NULL,
+    nombre_completo TEXT, -- Compatibilidad
     carrera TEXT DEFAULT 'Ingeniería de Software',
     semestre TEXT DEFAULT 'Semestre 2025-1',
-    fecha_inicio DATE NOT NULL DEFAULT CURRENT_DATE,
-    fecha_fin DATE NOT NULL DEFAULT (CURRENT_DATE + INTERVAL '6 months'),
-    meta_horas INTEGER NOT NULL DEFAULT 360 CHECK (meta_horas > 0 AND meta_horas <= 1200),
+    meta_horas_total NUMERIC(6,2) NOT NULL DEFAULT 360.00 CHECK (meta_horas_total > 0 AND meta_horas_total <= 1200),
+    meta_horas INTEGER DEFAULT 360, -- Alias de compatibilidad
+    horas_iniciales_previas NUMERIC(6,2) NOT NULL DEFAULT 0.00 CHECK (horas_iniciales_previas >= 0),
+    horas_minimas_semanales NUMERIC(5,2) NOT NULL DEFAULT 30.00 CHECK (horas_minimas_semanales >= 0),
+    perfil_completado BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_inicio DATE,
+    fecha_fin DATE,
     
-    -- Horario Semanal Multidía en formato JSONB estructurado
+    -- Horario Semanal Multidía en formato JSONB estructurado (Lunes a Domingo)
     horario_semanal JSONB NOT NULL DEFAULT '{
-      "lunes":     { "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "martes":    { "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "miercoles": { "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "jueves":    { "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "viernes":   { "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "sabado":    { "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-      "domingo":   { "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" }
+      "lunes":     { "diaSemana": "lunes",     "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "martes":    { "diaSemana": "martes",    "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "miercoles": { "diaSemana": "miercoles", "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "jueves":    { "diaSemana": "jueves",    "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "viernes":   { "diaSemana": "viernes",   "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "sabado":    { "diaSemana": "sabado",    "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+      "domingo":   { "diaSemana": "domingo",   "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" }
     }'::jsonb,
 
     avatar_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
 
-    -- Regla de Integridad de Negocio: Fecha de inicio debe ser anterior a fecha de fin
-    CONSTRAINT chk_fechas_convenio CHECK (fecha_inicio < fecha_fin)
+    CONSTRAINT chk_fechas_convenio CHECK (fecha_inicio IS NULL OR fecha_fin IS NULL OR fecha_inicio <= fecha_fin)
 );
 
 CREATE INDEX idx_perfiles_email ON public.perfiles(email);
 
 -- ==============================================================================
 -- 4. TABLA: public.registros_horas (Jornadas Diarias de Práctica)
+-- Admite IDs generados por el cliente (UUID v4) para soporte Offline-First
 -- ==============================================================================
 CREATE TABLE public.registros_horas (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -66,17 +70,19 @@ CREATE TABLE public.registros_horas (
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
     descuento_almuerzo_min INTEGER NOT NULL DEFAULT 0 CHECK (descuento_almuerzo_min >= 0 AND descuento_almuerzo_min <= 180),
-    horas_computables NUMERIC(4,2) NOT NULL CHECK (horas_computables > 0 AND horas_computables <= 24),
+    horas_computables NUMERIC(5,2) NOT NULL CHECK (horas_computables >= 0 AND horas_computables <= 24),
     modalidad TEXT NOT NULL DEFAULT 'Presencial' CHECK (modalidad IN ('Presencial', 'Remoto', 'Híbrido')),
     actividades TEXT NOT NULL,
     supervisor_nombre TEXT,
     estado TEXT NOT NULL DEFAULT 'Aprobado' CHECK (estado IN ('Borrador', 'Pendiente', 'Aprobado', 'Observado')),
+    deleted_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
 CREATE INDEX idx_registros_horas_user ON public.registros_horas(user_id);
 CREATE INDEX idx_registros_horas_fecha ON public.registros_horas(fecha);
+CREATE INDEX idx_registros_horas_deleted ON public.registros_horas(deleted_at);
 
 -- ==============================================================================
 -- 5. TABLA: public.intentos_login (Anti-Brute Force)
@@ -137,39 +143,59 @@ CREATE TRIGGER trg_registros_horas_updated_at
 -- Crear perfil automáticamente al registrar usuario en auth.users
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    nombre_val TEXT;
 BEGIN
+    nombre_val := COALESCE(
+        NEW.raw_user_meta_data->>'nombre',
+        NEW.raw_user_meta_data->>'nombreCompleto',
+        split_part(NEW.email, '@', 1)
+    );
+
     INSERT INTO public.perfiles (
         id,
         email,
+        nombre,
         nombre_completo,
         carrera,
         semestre,
+        meta_horas_total,
+        meta_horas,
+        horas_iniciales_previas,
+        horas_minimas_semanales,
+        perfil_completado,
         fecha_inicio,
         fecha_fin,
-        meta_horas,
         horario_semanal
     )
     VALUES (
         NEW.id,
         NEW.email,
-        COALESCE(NEW.raw_user_meta_data->>'nombreCompleto', split_part(NEW.email, '@', 1)),
-        NEW.raw_user_meta_data->>'carrera',
-        NEW.raw_user_meta_data->>'semestre',
-        COALESCE((NEW.raw_user_meta_data->>'fechaInicio')::DATE, CURRENT_DATE),
-        COALESCE((NEW.raw_user_meta_data->>'fechaFin')::DATE, (CURRENT_DATE + INTERVAL '6 months')::DATE),
-        COALESCE((NEW.raw_user_meta_data->>'metaHoras')::INTEGER, 360),
+        nombre_val,
+        nombre_val,
+        COALESCE(NEW.raw_user_meta_data->>'carrera', 'Ingeniería de Software'),
+        COALESCE(NEW.raw_user_meta_data->>'semestre', 'Semestre 2025-1'),
+        COALESCE((NEW.raw_user_meta_data->>'metaHorasTotal')::NUMERIC, (NEW.raw_user_meta_data->>'metaHoras')::NUMERIC, 360.00),
+        COALESCE((NEW.raw_user_meta_data->>'metaHoras')::INTEGER, (NEW.raw_user_meta_data->>'metaHorasTotal')::INTEGER, 360),
+        COALESCE((NEW.raw_user_meta_data->>'horasInicialesPrevias')::NUMERIC, 0.00),
+        COALESCE((NEW.raw_user_meta_data->>'horasMinimasSemanales')::NUMERIC, 30.00),
+        COALESCE((NEW.raw_user_meta_data->>'perfilCompletado')::BOOLEAN, FALSE),
+        CASE WHEN NEW.raw_user_meta_data->>'fechaInicio' IS NOT NULL THEN (NEW.raw_user_meta_data->>'fechaInicio')::DATE ELSE NULL END,
+        CASE WHEN NEW.raw_user_meta_data->>'fechaFin' IS NOT NULL THEN (NEW.raw_user_meta_data->>'fechaFin')::DATE ELSE NULL END,
         COALESCE((NEW.raw_user_meta_data->'horarioSemanal')::jsonb, '{
-          "lunes":     { "activo": true,  "horaInicio": "08:00", "horaFin": "17:00", "descuentoAlmuerzoMinutos": 60, "modalidad": "Presencial" },
-          "martes":    { "activo": true,  "horaInicio": "08:00", "horaFin": "17:00", "descuentoAlmuerzoMinutos": 60, "modalidad": "Presencial" },
-          "miercoles": { "activo": true,  "horaInicio": "08:00", "horaFin": "17:00", "descuentoAlmuerzoMinutos": 60, "modalidad": "Presencial" },
-          "jueves":    { "activo": true,  "horaInicio": "08:00", "horaFin": "17:00", "descuentoAlmuerzoMinutos": 60, "modalidad": "Presencial" },
-          "viernes":   { "activo": true,  "horaInicio": "08:00", "horaFin": "17:00", "descuentoAlmuerzoMinutos": 60, "modalidad": "Presencial" },
-          "sabado":    { "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" },
-          "domingo":   { "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "descuentoAlmuerzoMinutos": 0,  "modalidad": "Presencial" }
+          "lunes":     { "diaSemana": "lunes",     "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "martes":    { "diaSemana": "martes",    "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "miercoles": { "diaSemana": "miercoles", "activo": true,  "horaInicio": "14:00", "horaFin": "19:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "jueves":    { "diaSemana": "jueves",    "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "viernes":   { "diaSemana": "viernes",   "activo": true,  "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "sabado":    { "diaSemana": "sabado",    "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" },
+          "domingo":   { "diaSemana": "domingo",   "activo": false, "horaInicio": "08:00", "horaFin": "13:00", "refrigerioMinutos": 0, "modalidad": "Presencial" }
         }'::jsonb)
     )
     ON CONFLICT (id) DO UPDATE SET
+        nombre = EXCLUDED.nombre,
         nombre_completo = EXCLUDED.nombre_completo,
+        meta_horas_total = EXCLUDED.meta_horas_total,
         meta_horas = EXCLUDED.meta_horas,
         horario_semanal = EXCLUDED.horario_semanal;
 
@@ -177,7 +203,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Recrear trigger de forma segura
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users

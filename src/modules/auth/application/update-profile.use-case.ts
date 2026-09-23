@@ -12,17 +12,15 @@ export class UpdateProfileUseCase {
     if (dto.fechaInicio && dto.fechaFin) {
       AuthBusinessRules.validateConvenioDates(dto.fechaInicio, dto.fechaFin);
     }
-    if (dto.metaHoras !== undefined) {
-      AuthBusinessRules.validateMetaHoras(dto.metaHoras);
-    }
-    if (dto.horaInicioHabitual && dto.horaFinHabitual) {
-      AuthBusinessRules.validateHabitualSchedule(
-        dto.horaInicioHabitual,
-        dto.horaFinHabitual,
-        dto.descuentoAlmuerzoHabitual ?? 60
-      );
+    const meta = dto.metaHorasTotal ?? dto.metaHoras;
+    if (meta !== undefined) {
+      AuthBusinessRules.validateMetaHoras(meta);
     }
 
-    return await this.authRepository.updateProfile(userId, dto);
+    return await this.authRepository.updateProfile(userId, {
+      ...dto,
+      metaHorasTotal: meta,
+      metaHoras: meta,
+    });
   }
 }
