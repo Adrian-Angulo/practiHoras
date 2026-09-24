@@ -29,9 +29,12 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
+    "nodemailer": "^10.0.10",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "zod": "^3.24.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.2"
+  }
 }

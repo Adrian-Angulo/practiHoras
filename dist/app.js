@@ -32,7 +32,7 @@ const createApp = () => {
     // 2. Root & Health check endpoints
     app.get('/', (_req, res) => {
         res.status(200).json({
-            name: 'PractiHoras Backend API',
+            name: 'Horaly Backend API',
             status: 'ONLINE',
             architecture: 'Clean Architecture & SOLID',
             description: 'API REST compatible con Frontend Web y Frontend Móvil (Flutter)',

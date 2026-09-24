@@ -18,6 +18,9 @@ exports.ENV = {
     LOGIN_MAX_FAILED_ATTEMPTS: parseInt(process.env['LOGIN_MAX_FAILED_ATTEMPTS'] || '5', 10),
     LOGIN_LOCKOUT_MINUTES: parseInt(process.env['LOGIN_LOCKOUT_MINUTES'] || '15', 10),
     RESET_TOKEN_EXPIRATION_MINUTES: parseInt(process.env['RESET_TOKEN_EXPIRATION_MINUTES'] || '30', 10),
+    // Gmail SMTP
+    GMAIL_USER: process.env['GMAIL_USER'] || '',
+    GMAIL_PASS: process.env['GMAIL_PASS'] || '',
     isDev: (process.env['NODE_ENV'] || 'development') === 'development',
     isProd: process.env['NODE_ENV'] === 'production',
 };

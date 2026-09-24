@@ -8,6 +8,8 @@ export declare const ENV: {
     LOGIN_MAX_FAILED_ATTEMPTS: number;
     LOGIN_LOCKOUT_MINUTES: number;
     RESET_TOKEN_EXPIRATION_MINUTES: number;
+    GMAIL_USER: string;
+    GMAIL_PASS: string;
     isDev: boolean;
     isProd: boolean;
 };
