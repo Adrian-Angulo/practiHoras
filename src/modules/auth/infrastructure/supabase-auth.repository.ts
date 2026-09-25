@@ -187,17 +187,31 @@ export class SupabaseAuthRepository implements IAuthRepository {
       };
     }
 
+    // Invocar reset directo de Supabase Auth (envía el correo con el enlace mágico)
+    try {
+      const { error: resetError } = await this.supabaseAnon.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: ENV.CLIENT_ORIGIN ? `${ENV.CLIENT_ORIGIN}/reset-password` : undefined,
+      });
+      if (resetError) {
+        console.warn(`[Supabase Auth] Aviso al enviar reset password para ${cleanEmail}:`, resetError.message);
+      }
+    } catch (e: any) {
+      console.warn(`[Supabase Auth] Excepción al enviar reset password para ${cleanEmail}:`, e?.message);
+    }
+
     const plainToken = CryptoUtil.generateRandomToken(24);
     const tokenHash = CryptoUtil.hashToken(plainToken);
     const expiraEn = new Date(Date.now() + ENV.RESET_TOKEN_EXPIRATION_MINUTES * 60 * 1000);
 
-    await this.supabaseAdmin.from('tokens_recuperacion').insert({
-      user_id: profile.id,
-      email: cleanEmail,
-      token_hash: tokenHash,
-      expira_en: expiraEn.toISOString(),
-      ip_solicitud: ipAddress,
-    });
+    try {
+      await this.supabaseAdmin.from('tokens_recuperacion').insert({
+        user_id: profile.id,
+        email: cleanEmail,
+        token_hash: tokenHash,
+        expira_en: expiraEn.toISOString(),
+        ip_solicitud: ipAddress,
+      });
+    } catch (_) {}
 
     return {
       token: plainToken,
